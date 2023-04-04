@@ -1,20 +1,39 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Settings, StyleSheet, Text, View } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
+import { NavigationContainer } from '@react-navigation/native';
+import Login from './screens/Login'
+import signUp from './screens/signUp'
+import Circles from './screens/Circles'
+import settingsPage from './screens/Settings'
 
-export default function App() {
+
+const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
+
+
+function Main() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Tab.Navigator initialRouteName="mainNavigation">
+      <Tab.Screen name="Circles" component={Circles} />
+      <Tab.Screen name="Chats" component={Chats} />
+      <Tab.Screen name="Settings" component={settingsPage} />
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
+function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="LoggedOutNav">
+      <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Main" component={Main} options={{headerShown:false}}/>
+      <Stack.Screen name="signUp" component={signUp} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+export default App;
