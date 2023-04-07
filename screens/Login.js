@@ -6,7 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import styles from '/styles/StyleSheet';
 import { Component } from 'react';
 import { Button, TextInput } from 'react-native-web';
-import { getReq, getPost } from './requests';
+import { getReq, getPost , getDomain} from './requests';
 
 export default class App extends Component{
 
@@ -17,13 +17,26 @@ export default class App extends Component{
     this.state = {
       email:'',
       password:'',
+      loginStatus:''
     }
 
   }
 
+
+    // example get
     loginHandler = async() => {
-      const text = await getReq("https://jsonplaceholder.typicode.com/todos/1");
-      console.log(text);
+
+      const text = await getReq(getDomain()  + "api/users/");
+      console.log(text.status);
+    }
+
+    dataCheck = async(email , password) => {
+      if (!areParametersPresent(email,password)){
+        this.setState({loginStatus:"Missing credentials"})
+      }
+      else if (!isEmailValid(email) || !validatePassword(password)){
+        this.setState({loginStatus:"Invalid email/password"})
+      }
     }
 
   render() {
