@@ -55,8 +55,6 @@ export default class App extends Component{
     }
 
     dataCheck = async(email , password , name) => {
-      console.log(isEmailValid(email));
-      console.log(validatePassword(password));
       if (!areParametersPresent(email,password)){
         this.setState({loginStatus:"Missing credentials"})
       }

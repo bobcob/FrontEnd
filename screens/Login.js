@@ -6,7 +6,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import styles from '/styles/StyleSheet';
 import { Component } from 'react';
 import { Button, TextInput } from 'react-native-web';
-import { getReq, getPost , getDomain} from './requests';
+import { getReq, postReq  , getDomain , validatePassword , areParametersPresent , isEmailValid} from './requests';
+
 
 export default class App extends Component{
 
@@ -22,20 +23,41 @@ export default class App extends Component{
 
   }
 
+  setEmail = (email) => {
+    this.setState({ email });
+  }
+  
+  setPassword = (password) => {
+    this.setState({ password });
+  }
 
     // example get
-    loginHandler = async() => {
+    loginHandler = async(email , password) => {
+      const data = {
+        "email":email,
+        "password":password,
+      }
+      const req = await postReq(getDomain()  + "api/login/" , data);
+      if (req.status == 200){
+        console.log("Logged in");
+      }
+      else{
+        this.setState({loginStatus:"Incorrect email/password"})
+      }
 
-      const text = await getReq(getDomain()  + "api/users/");
-      console.log(text.status);
     }
 
     dataCheck = async(email , password) => {
+      console.log(email);
+      console.log(password);
       if (!areParametersPresent(email,password)){
         this.setState({loginStatus:"Missing credentials"})
       }
       else if (!isEmailValid(email) || !validatePassword(password)){
         this.setState({loginStatus:"Invalid email/password"})
+      }
+      else{
+        this.loginHandler(email , password);
       }
     }
 
@@ -44,12 +66,13 @@ export default class App extends Component{
     return (
       <View style={styles.container}>
         <Text style={styles.text}>Login</Text>
-        <TextInput placeholder = "Email"></TextInput>
-        <TextInput secureTextEntry={true} placeholder = "Password"></TextInput>
-        <Button style={styles.button} title = "Log in" onPress={this.loginHandler}></Button>
+        <TextInput placeholder = "Email" onChangeText={this.setEmail} value={this.state.email}></TextInput>
+        <TextInput placeholder = "Password" onChangeText={this.setPassword} value={this.state.password} ></TextInput>
+        <Button style={styles.button} title = "Log in" onPress={() => this.dataCheck(this.state.email, this.state.password)}></Button>
         <Pressable onPress={() => navigation.navigate('signUp')}>
             <Text>Not got an account? Sign up here</Text>
         </Pressable>
+        <Text>{this.state.loginStatus}</Text>
       </View>
     );
   }
