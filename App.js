@@ -1,4 +1,6 @@
 import { StatusBar } from "expo-status-bar";
+import React, { useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Settings, StyleSheet, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -7,6 +9,7 @@ import Login from "./screens/Login";
 import signUp from "./screens/signUp";
 import Circles from "./screens/Circles";
 import Chats from "./screens/Chats";
+import addContact from "./screens/addContact";
 import Contacts from "./screens/Contacts";
 import settingsPage from "./screens/Settings";
 
@@ -35,6 +38,7 @@ function App() {
           options={{ headerShown: false }}
         />
         <Stack.Screen name="signUp" component={signUp} />
+        <Stack.Screen name="addContact" component={addContact} />
       </Stack.Navigator>
     </NavigationContainer>
   );

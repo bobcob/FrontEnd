@@ -1,29 +1,50 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
-const globalStyles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#AF9F9B',
-    alignItems: 'center',
-    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: "#fff",
   },
-  text: {
+  heading: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-    marginVertical: 10,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  list: {
+    marginTop: 20,
+  },
+  card: {
+    padding: 10,
+    backgroundColor: "#f2f2f2",
+    marginVertical: 5,
+  },
+  name: {
+    fontSize: 18,
+  },
+  email: {
+    fontSize: 16,
   },
   button: {
-    backgroundColor: '#007aff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: "#007aff",
+    padding: 10,
     borderRadius: 5,
+    marginTop: 5,
   },
   buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  buttonContainer: {
+    flexDirection: "row",
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
   },
 });
 
-export default globalStyles;
+export default styles;

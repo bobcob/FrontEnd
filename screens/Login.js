@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -17,6 +18,13 @@ import {
 } from "./requests";
 
 export default class App extends Component {
+  async componentDidMount() {
+    const authToken = await AsyncStorage.getItem("auth_token");
+    if (authToken) {
+      this.props.navigation.navigate("Main", { screen: "Chats" });
+    }
+  }
+
   constructor(props) {
     super(props);
 
@@ -54,8 +62,6 @@ export default class App extends Component {
   };
 
   dataCheck = async (email, password) => {
-    console.log(email);
-    console.log(password);
     if (!areParametersPresent(email, password)) {
       this.setState({ loginStatus: "Missing credentials" });
     } else if (!isEmailValid(email) || !validatePassword(password)) {
