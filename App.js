@@ -11,6 +11,7 @@ import Circles from "./screens/Circles";
 import Chats from "./screens/Chats";
 import addContact from "./screens/addContact";
 import Contacts from "./screens/Contacts";
+import manageContact from "./screens/manageContact";
 import settingsPage from "./screens/Settings";
 
 const Tab = createBottomTabNavigator();
@@ -39,6 +40,7 @@ function App() {
         />
         <Stack.Screen name="signUp" component={signUp} />
         <Stack.Screen name="addContact" component={addContact} />
+        <Stack.Screen name="manageContact" component={manageContact} />
       </Stack.Navigator>
     </NavigationContainer>
   );

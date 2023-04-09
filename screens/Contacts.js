@@ -1,78 +1,129 @@
-import React, { useEffect, useState } from "react";
+import React, { Component } from "react";
 import {
   StyleSheet,
   Text,
   View,
   FlatList,
   TouchableOpacity,
+  Button,
 } from "react-native";
-import { getReq, getDomain, getAuthToken, getUid } from "./requests";
+import {
+  getReq,
+  postReq,
+  getDomain,
+  deleteReq,
+  getAuthToken,
+  getUid,
+} from "./requests";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Button, TextInput } from "react-native-web";
 
-const ContactCard = ({ contact }) => {
-  return (
-    <TouchableOpacity style={styles.card}>
-      <Text style={styles.name}>{contact.name}</Text>
-      <Text style={styles.email}>{contact.email}</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Message</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Manage</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Delete</Text>
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
-};
+class ContactCard extends Component {
+  handleMessage = (contact) => {
+    console.log(contact.id);
+  };
 
-const ContactList = ({ contacts }) => {
-  return (
-    <FlatList
-      data={contacts}
-      keyExtractor={(contact) => contact.id.toString()}
-      renderItem={({ item }) => <ContactCard contact={item} />}
-      style={styles.list}
-    />
-  );
-};
+  handleManage = (contact) => {
+    console.log(contact.id);
+  };
 
-export default function App({ navigation }) {
-  const [contacts, setContacts] = useState([]);
+  handleRemove = async (contact) => {
+    const now = new Date();
+    const data = {
+      user1ID: await getUid(),
+      user2ID: contact.id,
+      dateAdded: now,
+    };
+    const req = await deleteReq(getDomain() + "api/contacts/", data);
+  };
 
-  const getAllContacts = async () => {
+  render() {
+    const { contact } = this.props;
+    return (
+      <TouchableOpacity style={styles.card}>
+        <Text style={styles.email}>{contact.id}</Text>
+        <Text style={styles.name}>{contact.name}</Text>
+        <Text style={styles.email}>{contact.email}</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => this.handleMessage(contact)}
+          >
+            <Text style={styles.buttonText}>Message</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => this.handleManage(contact)}
+          >
+            <Text style={styles.buttonText}>Manage</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => this.handleRemove(contact)}
+          >
+            <Text style={styles.buttonText}>Remove</Text>
+          </TouchableOpacity>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+}
+
+class ContactList extends Component {
+  render() {
+    const { contacts } = this.props;
+    return (
+      <FlatList
+        data={contacts}
+        keyExtractor={(contact) => contact.id.toString()}
+        renderItem={({ item }) => <ContactCard contact={item} />}
+        style={styles.list}
+      />
+    );
+  }
+}
+
+export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      contacts: [],
+    };
+  }
+
+  getAllContacts = async () => {
     const req = await getReq(getDomain() + "api/contacts/" + (await getUid()));
     const data = await req.json;
-    setContacts(data);
+    this.setState({ contacts: data });
   };
 
-  const handleAddContact = () => {
-    navigation.navigate("addContact");
+  handleAddContact = () => {
+    this.props.navigation.navigate("addContact");
   };
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("focus", () => {
-      getAllContacts();
+  componentDidMount() {
+    this.unsubscribe = this.props.navigation.addListener("focus", () => {
+      this.getAllContacts();
     });
+  }
 
-    return unsubscribe;
-  }, [navigation]);
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Contacts</Text>
-      <Button
-        style={styles.button}
-        title="Add contact"
-        onPress={handleAddContact}
-      ></Button>
-      <ContactList contacts={contacts} />
-    </View>
-  );
+  render() {
+    const { contacts } = this.state;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.heading}>Contacts</Text>
+        <Button
+          style={styles.button}
+          title="Add contact"
+          onPress={this.handleAddContact}
+        ></Button>
+        <ContactList contacts={contacts} />
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({

@@ -61,6 +61,21 @@ export const postReq = async (url, data) => {
   return { status: response.status, json };
 };
 
+export const deleteReq = async (url, data) => {
+  const auth = await getAuthToken();
+  const response = await fetch(url, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Authorization": auth,
+      Uid: await getUid(),
+    },
+    body: JSON.stringify(data),
+  });
+  const json = await response.json();
+  return { status: response.status, json };
+};
+
 export const getAuthToken = async () => {
   try {
     const token = await AsyncStorage.getItem("auth_token");
