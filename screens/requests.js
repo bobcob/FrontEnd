@@ -75,7 +75,20 @@ export const deleteReq = async (url, data) => {
   const json = await response.json();
   return { status: response.status, json };
 };
-
+export const putReq = async (url, data) => {
+  const auth = await getAuthToken();
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Authorization": auth,
+      Uid: await getUid(),
+    },
+    body: JSON.stringify(data),
+  });
+  const json = await response.json();
+  return { status: response.status, json };
+};
 export const getAuthToken = async () => {
   try {
     const token = await AsyncStorage.getItem("auth_token");
@@ -88,6 +101,16 @@ export const getAuthToken = async () => {
 export const getUid = async () => {
   try {
     const token = await AsyncStorage.getItem("id");
+    return token;
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const getTargetUser = async () => {
+  try {
+    const token = await AsyncStorage.getItem("targetUserID");
+    AsyncStorage.removeItem("targetUserID");
+    //security feature?
     return token;
   } catch (error) {
     console.log(error);

@@ -18,26 +18,13 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 class ContactCard extends Component {
-  handleMessage = (contact) => {
-    console.log(contact.id);
-  };
-
   handleManage = (contact) => {
-    console.log(contact.id);
-  };
-
-  handleRemove = async (contact) => {
-    const now = new Date();
-    const data = {
-      user1ID: await getUid(),
-      user2ID: contact.id,
-      dateAdded: now,
-    };
-    const req = await deleteReq(getDomain() + "api/contacts/", data);
+    AsyncStorage.setItem("targetUserID", contact.id);
+    this.props.navigation.navigate("manageContact");
   };
 
   render() {
-    const { contact } = this.props;
+    const { contact, navigation } = this.props;
     return (
       <TouchableOpacity style={styles.card}>
         <Text style={styles.email}>{contact.id}</Text>
@@ -46,21 +33,9 @@ class ContactCard extends Component {
         <View style={styles.buttonContainer}>
           <TouchableOpacity
             style={styles.button}
-            onPress={() => this.handleMessage(contact)}
-          >
-            <Text style={styles.buttonText}>Message</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
             onPress={() => this.handleManage(contact)}
           >
             <Text style={styles.buttonText}>Manage</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => this.handleRemove(contact)}
-          >
-            <Text style={styles.buttonText}>Remove</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -70,12 +45,14 @@ class ContactCard extends Component {
 
 class ContactList extends Component {
   render() {
-    const { contacts } = this.props;
+    const { contacts, navigation } = this.props;
     return (
       <FlatList
         data={contacts}
         keyExtractor={(contact) => contact.id.toString()}
-        renderItem={({ item }) => <ContactCard contact={item} />}
+        renderItem={({ item }) => (
+          <ContactCard contact={item} navigation={navigation} />
+        )}
         style={styles.list}
       />
     );
@@ -120,7 +97,7 @@ export default class App extends Component {
           title="Add contact"
           onPress={this.handleAddContact}
         ></Button>
-        <ContactList contacts={contacts} />
+        <ContactList contacts={contacts} navigation={this.props.navigation} />
       </View>
     );
   }
