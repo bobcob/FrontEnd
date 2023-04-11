@@ -14,6 +14,7 @@ import Contacts from "./screens/Contacts";
 import manageContact from "./screens/manageContact";
 import settingsPage from "./screens/Settings";
 import Conversation from "./screens/Conversation";
+import newChat from "./screens/newChat";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -43,6 +44,7 @@ function App() {
         <Stack.Screen name="addContact" component={addContact} />
         <Stack.Screen name="manageContact" component={manageContact} />
         <Stack.Screen name="Conversation" component={Conversation} />
+        <Stack.Screen name="newChat" component={newChat} />
       </Stack.Navigator>
     </NavigationContainer>
   );

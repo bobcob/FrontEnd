@@ -60,7 +60,11 @@ export default class App extends Component {
       password: this.state.password,
     };
     const req = await putReq(getDomain() + "api/users/", data);
-    this.setState({ loginStatus: "Information Updated!" });
+    if (req.status == 200) {
+      this.setState({ status: "Information Updated!" });
+    } else {
+      this.setState({ status: "Could not update information" });
+    }
   };
 
   getContact = async () => {
@@ -128,7 +132,7 @@ export default class App extends Component {
             style={styles.button}
           />
         </View>
-        <Text>{this.state.loginStatus}</Text>
+        <Text>{this.state.status}</Text>
       </View>
     );
   }

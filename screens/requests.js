@@ -42,7 +42,7 @@ export const getReq = async (url) => {
       Uid: await getUid(),
     },
   });
-  const json = response.json();
+  const json = await response.json();
   return { status: response.status, json };
 };
 
@@ -108,11 +108,28 @@ export const getUid = async () => {
 };
 export const getTargetUser = async () => {
   try {
-    const token = await AsyncStorage.getItem("targetUserID");
-    AsyncStorage.removeItem("targetUserID");
+    const token = await AsyncStorage.getItem("targetConversation");
+    console.log("target convo:" + token);
     //security feature?
     return token;
   } catch (error) {
     console.log(error);
   }
 };
+
+export const getTargetChat = async () => {
+  try {
+    const token = await AsyncStorage.getItem("targetUserID");
+    console.log("target user:" + token);
+    //security feature?
+    return token;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export function sortArray(array) {
+  return array.sort(function (a, b) {
+    return a - b;
+  });
+}

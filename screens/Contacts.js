@@ -91,12 +91,15 @@ export default class App extends Component {
     const { contacts } = this.state;
     return (
       <View style={styles.container}>
-        <Text style={styles.heading}>Contacts</Text>
-        <Button
-          style={styles.button}
-          title="Add contact"
-          onPress={this.handleAddContact}
-        ></Button>
+        <View style={styles.header}>
+          <Text style={styles.heading}>Contacts</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={this.handleAddContact}
+          >
+            <Text style={styles.buttonText}>+</Text>
+          </TouchableOpacity>
+        </View>
         <ContactList contacts={contacts} navigation={this.props.navigation} />
       </View>
     );
@@ -109,10 +112,15 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
   heading: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
   },
   list: {
     marginTop: 20,
@@ -133,19 +141,5 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 5,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-  },
-  buttonRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 10,
   },
 });
