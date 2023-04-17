@@ -13,6 +13,7 @@ import {
   getTargetUser,
   getTargetChat,
   sortArray,
+  getTargetChatContacts,
 } from "./requests";
 
 export default class App extends Component {
@@ -22,13 +23,13 @@ export default class App extends Component {
       title: "Chat",
       userIds: [],
       contacts: [],
+      credentials: "",
     };
   }
 
   getContact = async () => {
-    const req = await getReq(
-      getDomain() + "api/users/" + (await getTargetChat())
-    );
+    const { contactID } = this.props.route.params;
+    const req = await getReq(getDomain() + "api/users/" + contactID);
     const data = await req.json;
     this.setState({ contacts: data });
   };
@@ -37,7 +38,14 @@ export default class App extends Component {
     this.unsubscribe = this.props.navigation.addListener("focus", () => {
       this.getContact();
     });
+    this.checkCredentialsAndUpdateState();
   }
+
+  checkCredentialsAndUpdateState = async () => {
+    const { contacts } = this.state;
+    const credentials = await this.checkCredentials(contacts);
+    this.setState({ credentials });
+  };
 
   componentWillUnmount() {
     this.unsubscribe();
@@ -69,22 +77,49 @@ export default class App extends Component {
     }
   };
 
+  handleAdmin = async (contact) => {
+    console.log(await getTargetChatContacts());
+    const data = {
+      chatId: parseInt(await getTargetChatContacts()),
+      userID: parseInt(await getTargetChat()),
+    };
+    const req = await postReq(
+      getDomain() + "api/chats/relationships/admin/",
+      data
+    );
+  };
+
   handlePressRemove = async (contact) => {
     const { navigation } = this.props;
-    const now = new Date();
     const data = {
-      user1ID: await getUid(),
-      user2ID: contact.id,
-      dateAdded: now,
+      chatId: parseInt(await getTargetChatContacts()),
+      userID: contact.id,
     };
-    const req = await deleteReq(getDomain() + "api/contacts/", data);
+    const req = await deleteReq(getDomain() + "api/chats/relationships/", data);
     if (req.status == 200) {
-      navigation.navigate("Main", { screen: "Contacts" });
+      const targetChatContacts = await getTargetChatContacts();
+      navigation.navigate("ChatInformation", {
+        targetChatContacts,
+      });
     }
   };
 
+  checkCredentials = async (contacts) => {
+    const data = {
+      chatID: 3,
+      id: parseInt(await getUid()),
+    };
+    const checkCredentials = await postReq(
+      getDomain() + "api/chats/relationships/admin/check",
+      data
+    );
+    return checkCredentials.json.user;
+  };
+
   render() {
-    const { contacts } = this.state;
+    const { admin } = this.props.route.params;
+    const { creator } = this.props.route.params;
+    const { contacts, credentials } = this.state;
     return (
       <View style={styles.container}>
         <Text style={styles.heading}>Manage Contact</Text>
@@ -106,11 +141,20 @@ export default class App extends Component {
             onPress={this.handlePressMessage}
             style={styles.button}
           />
-          <Button
-            title="Remove"
-            onPress={() => this.handlePressRemove(contacts)}
-            style={styles.button}
-          />
+          {credentials === "Admin" || credentials === "Creator" ? (
+            <Button
+              title="Remove from chat"
+              onPress={() => this.handlePressRemove(contacts)}
+              style={styles.button}
+            />
+          ) : null}
+          {credentials === "Creator" ? (
+            <Button
+              title="Give admin role"
+              onPress={() => this.handleAdmin(contacts)}
+              style={styles.button}
+            />
+          ) : null}
         </View>
       </View>
     );

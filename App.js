@@ -15,6 +15,11 @@ import manageContact from "./screens/manageContact";
 import settingsPage from "./screens/Settings";
 import Conversation from "./screens/Conversation";
 import newChat from "./screens/newChat";
+import ChatInformation from "./screens/ChatInformation";
+import { Button, TextInput, TouchableOpacity } from "react-native-web";
+import { getTargetChatContacts } from "./screens/requests";
+import ManageContactInChat from "./screens/ManageContactInChat";
+import addContactToChat from "./screens/addContactToChat";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -43,11 +48,52 @@ function App() {
         <Stack.Screen name="signUp" component={signUp} />
         <Stack.Screen name="addContact" component={addContact} />
         <Stack.Screen name="manageContact" component={manageContact} />
-        <Stack.Screen name="Conversation" component={Conversation} />
+        <Stack.Screen
+          name="Conversation"
+          component={Conversation}
+          options={({ route, navigation }) => ({
+            headerRight: () => {
+              const fetchTargetChatContactsAndNavigate = async () => {
+                const targetChatContacts = await getTargetChatContacts();
+                navigation.navigate("ChatInformation", {
+                  targetChatContacts,
+                });
+              };
+
+              return (
+                <TouchableOpacity
+                  onPress={fetchTargetChatContactsAndNavigate}
+                  style={styles.button}
+                >
+                  <Text style={styles.buttonText}>Chat Information</Text>
+                </TouchableOpacity>
+              );
+            },
+          })}
+        />
+        <Stack.Screen name="ChatInformation" component={ChatInformation} />
+        <Stack.Screen name="addContactToChat" component={addContactToChat} />
+        <Stack.Screen
+          name="ManageContactInChat"
+          component={ManageContactInChat}
+        />
         <Stack.Screen name="newChat" component={newChat} />
       </Stack.Navigator>
     </NavigationContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  button: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+});
 
 export default App;

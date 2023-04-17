@@ -22,7 +22,10 @@ export default class App extends Component {
     const getChatPreviews = await getReq(
       getDomain() + "api/chats/preview/" + (await getUid())
     );
-    this.setState({ chatPreviews: getChatPreviews.json });
+    const filteredChatPreviews = getChatPreviews.json.filter(
+      (item) => item !== null
+    );
+    this.setState({ chatPreviews: filteredChatPreviews });
   };
 
   componentDidMount() {
@@ -41,7 +44,6 @@ export default class App extends Component {
   };
 
   renderChatPreview = ({ item }) => {
-    const { navigation } = this.props;
     return (
       <TouchableOpacity
         style={styles.chatPreviewContainer}
@@ -52,7 +54,7 @@ export default class App extends Component {
         }}
       >
         <View>
-          <Text style={styles.chatTitle}>Title</Text>
+          <Text style={styles.chatTitle}>{item.title}</Text>
           <Text style={styles.chatMessage}>{item.message}</Text>
           <Text style={styles.chatTime}>{item.time}</Text>
         </View>
@@ -63,7 +65,7 @@ export default class App extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.header}>Chats</Text>
+        <Text style={styles.header}></Text>
         <TouchableOpacity style={styles.newChatButton} onPress={this.newChat}>
           <Text style={styles.buttonText}>New Chat</Text>
         </TouchableOpacity>
@@ -81,14 +83,15 @@ export default class App extends Component {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: "#fff",
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
   },
   header: {
     fontSize: 24,
+    marginTop: 70,
     fontWeight: "bold",
     marginBottom: 20,
+    textAlign: "center",
   },
   newChatButton: {
     position: "absolute",
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   chatPreviews: {
-    alignItems: "center",
+    alignSelf: "stretch",
   },
   chatPreviewContainer: {
     flexDirection: "column",
@@ -113,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
     borderRadius: 10,
     marginBottom: 10,
-    width: "90%",
+    width: "100%",
   },
   chatTitle: {
     fontSize: 18,

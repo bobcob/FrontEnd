@@ -8,7 +8,6 @@ import {
   Pressable,
 } from "react-native";
 import { Component } from "react";
-import styles from "/styles/StyleSheet";
 import {
   getReq,
   postReq,
@@ -76,8 +75,8 @@ export default class App extends Component {
   render() {
     const { navigation } = this.props;
     return (
-      <View style={styles.container}>
-        <Text style={styles.text}>Sign up</Text>
+      <View>
+        <Text>Sign up</Text>
         <TextInput
           placeholder="Email"
           onChangeText={this.setEmail}

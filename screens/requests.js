@@ -106,6 +106,7 @@ export const getUid = async () => {
     console.log(error);
   }
 };
+// needs looking at
 export const getTargetUser = async () => {
   try {
     const token = await AsyncStorage.getItem("targetConversation");
@@ -133,3 +134,12 @@ export function sortArray(array) {
     return a - b;
   });
 }
+
+export const getTargetChatContacts = async () => {
+  try {
+    const token = await AsyncStorage.getItem("getTargetChatContacts");
+    return token;
+  } catch (error) {
+    console.log(error);
+  }
+};

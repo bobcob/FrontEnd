@@ -28,7 +28,6 @@ export default class App extends Component {
     };
   }
   setName = (name) => {
-    console.log(name);
     this.setState({ name });
   };
 

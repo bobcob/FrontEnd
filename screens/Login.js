@@ -4,7 +4,6 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { NavigationContainer } from "@react-navigation/native";
-import styles from "/styles/StyleSheet";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Component } from "react";
 import { Button, TextInput } from "react-native-web";
@@ -77,21 +76,24 @@ export default class App extends Component {
       <View style={styles.container}>
         <Text style={styles.text}>Login</Text>
         <TextInput
+          style={styles.input}
           placeholder="Email"
           onChangeText={this.setEmail}
           value={this.state.email}
+          keyboardType="email-address"
+          autoCapitalize="none"
         ></TextInput>
         <TextInput
+          style={styles.input}
           secureTextEntry={true}
           placeholder="Password"
           onChangeText={this.setPassword}
           value={this.state.password}
         ></TextInput>
         <Button
-          style={styles.button}
           title="Log in"
           onPress={() => this.dataCheck(this.state.email, this.state.password)}
-        ></Button>
+        />
         <Pressable onPress={() => navigation.navigate("signUp")}>
           <Text>Not got an account? Sign up here</Text>
         </Pressable>
@@ -100,3 +102,40 @@ export default class App extends Component {
     );
   }
 }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f5f5f5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  text: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 30,
+  },
+  button: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#1e90ff",
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  buttonText: {
+    fontSize: 16,
+    color: "#fff",
+  },
+  input: {
+    width: "80%",
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingLeft: 15,
+    paddingRight: 15,
+    paddingTop: 10,
+    paddingBottom: 10,
+    marginBottom: 15,
+    fontSize: 16,
+    backgroundColor: "#fff",
+  },
+});

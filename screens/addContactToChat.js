@@ -6,7 +6,15 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { getDomain, getReq, postReq, sortArray, getUid } from "./requests";
+import {
+  getDomain,
+  getReq,
+  postReq,
+  sortArray,
+  getUid,
+  getTargetChatContacts,
+  getTargetChat,
+} from "./requests";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default class App extends Component {
@@ -14,38 +22,43 @@ export default class App extends Component {
     super(props);
     this.state = {
       title: "",
-      userIds: [""],
+      userId: "",
       warning: "",
     };
   }
 
+  getTitle = async () => {
+    const title = await getReq(
+      getDomain() + "api/chats/" + (await getTargetChatContacts()) + "/title"
+    );
+    return title.json.title;
+  };
+
   handleCreateChat = async () => {
-    if (this.state.userIds.includes(parseInt(await getUid()))) {
+    if (this.state.userId.includes(parseInt(await getUid()))) {
       this.setState({
         warning: "You cannot add yourself to a chat",
       });
       return;
     }
-    const chatID = await getReq(getDomain() + "api/chats/relationships/");
-    this.state.userIds.push(await getUid());
-    const sortedIDs = sortArray(this.state.userIds).map(Number);
-    var data = {
-      creatorID: parseInt(await getUid()),
-      title: this.state.title,
-      chatId: chatID.json.int,
-      userID: sortedIDs,
+    const data = {
+      Admin: "false",
+      GroupCreator: "false",
+      chatName: await this.getTitle(),
+      chatId: parseInt(await getTargetChatContacts()),
+      userID: parseInt(this.state.userId),
     };
     var sendRelationship = await postReq(
-      getDomain() + "api/chats/relationships/",
+      getDomain() + "api/chats/relationships/addUserToChat",
       data
     );
     if (sendRelationship.status == 200) {
-      this.props.navigation.navigate("Conversation", {
-        chatId: sendRelationship.json.chat,
+      this.props.navigation.navigate("ChatInformation", {
+        targetChatContacts: sendRelationship.json.chat,
       });
     } else {
-      this.props.navigation.navigate("Conversation", {
-        chatId: sendRelationship.json.chat,
+      this.props.navigation.navigate("ChatInformation", {
+        targetChatContacts: sendRelationship.json.chat,
       });
     }
   };
@@ -56,39 +69,27 @@ export default class App extends Component {
     }));
   };
 
-  handleUserIdChange = (text, index) => {
-    const newUserIds = [...this.state.userIds];
-    newUserIds[index] = text.trim() === "" ? "" : parseInt(text, 10);
-    this.setState({ userIds: newUserIds });
+  handleUserIdChange = (userId) => {
+    this.setState({ userId: userId });
   };
 
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>New Chat</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="Title"
-          onChangeText={(text) => this.setState({ title: text })}
-          value={this.state.title}
-        />
-
-        {this.state.userIds.map((userId, index) => (
-          <View key={index}>
-            <TextInput
-              style={styles.input}
-              placeholder="User ID"
-              onChangeText={(text) => this.handleUserIdChange(text, index)}
-              value={userId}
-            />
-          </View>
-        ))}
+        <Text style={styles.title}>Add user to chat</Text>
+        <View>
+          <TextInput
+            style={styles.input}
+            placeholder="User ID"
+            onChangeText={(userId) => this.handleUserIdChange(userId)}
+            value={this.state.userId}
+          />
+        </View>
         <TouchableOpacity style={styles.button} onPress={this.handleAddUser}>
-          <Text style={styles.buttonText}>Add User</Text>
+          <Text style={styles.buttonText}>Add additional user</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={this.handleCreateChat}>
-          <Text style={styles.buttonText}>Create new chat</Text>
+          <Text style={styles.buttonText}>Add user(s) to chat</Text>
         </TouchableOpacity>
         <Text>{this.state.warning}</Text>
       </View>
