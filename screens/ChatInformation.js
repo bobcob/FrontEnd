@@ -5,20 +5,17 @@ import {
   View,
   FlatList,
   TouchableOpacity,
-  Button,
 } from "react-native";
 import {
   getReq,
-  postReq,
   getDomain,
   deleteReq,
-  getAuthToken,
   getUid,
+  getTargetChatContacts,
 } from "./requests";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
+// importing all the custom and inbuilt functions to use in the code
 class ContactCard extends Component {
-  handleManage = (contact) => {
+  handleManage = async (contact) => {
     this.props.navigation.navigate("ManageContactInChat", {
       admin: "true",
       creator: "true",
@@ -27,19 +24,23 @@ class ContactCard extends Component {
   };
 
   render() {
-    const { contact, navigation } = this.props;
+    const { contact } = this.props;
+  
     return (
       <TouchableOpacity style={styles.card}>
         <Text style={styles.email}>{contact.id}</Text>
         <Text style={styles.name}>{contact.name}</Text>
         <Text style={styles.email}>{contact.email}</Text>
+        
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => this.handleManage(contact)}
-          >
-            <Text style={styles.buttonText}>Manage</Text>
-          </TouchableOpacity>
+        {contact.id !== this.props.currentUserId && (
+    <TouchableOpacity
+      style={styles.button}
+      onPress={() => this.handleManage(contact)}
+    >
+      <Text style={styles.buttonText}>View actions</Text>
+    </TouchableOpacity>
+  )}
         </View>
       </TouchableOpacity>
     );
@@ -48,14 +49,15 @@ class ContactCard extends Component {
 
 class ContactList extends Component {
   render() {
-    const { contacts, navigation } = this.props;
+    const { contacts, navigation , route } = this.props;
     return (
       <FlatList
         data={contacts}
         keyExtractor={(contact) => contact.id.toString()}
         renderItem={({ item }) => (
-          <ContactCard contact={item} navigation={navigation} />
+          <ContactCard contact={item} navigation={navigation} route={route} currentUserId={this.props.currentUserId} />
         )}
+        
         style={styles.list}
       />
     );
@@ -67,10 +69,21 @@ export default class App extends Component {
     super(props);
     this.state = {
       contacts: [],
+      currentUserId:null
     };
   }
-
-  checkCredentials = () => {};
+  handleLeaveChat = async () => {
+    const data = {      
+      chatId: parseInt(await getTargetChatContacts()),
+      userId: parseInt(await getUid())
+    }
+    const leaveChat = await deleteReq(getDomain() + "api/chats/relationships/" , data)
+    this.props.navigation.navigate("Chats");
+  }
+  getCurrentUserId = async () => {
+    const id = await getUid();
+    this.setState({ currentUserId: Number(id) });
+  };
 
   getAllContacts = async () => {
     const { targetChatContacts } = this.props.route.params;
@@ -85,10 +98,12 @@ export default class App extends Component {
     this.props.navigation.navigate("addContactToChat");
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     this.unsubscribe = this.props.navigation.addListener("focus", () => {
       this.getAllContacts();
+      this.getCurrentUserId();
     });
+
   }
 
   componentWillUnmount() {
@@ -102,13 +117,19 @@ export default class App extends Component {
         <View style={styles.header}>
           <Text style={styles.heading}>Users in chat</Text>
           <TouchableOpacity
-            style={styles.addButton}
+            style={styles.button}
             onPress={this.handleAddContact}
           >
-            <Text style={styles.buttonText}>+</Text>
+            <Text style={styles.buttonText}>Add user</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+              style={styles.button}
+              onPress={this.handleLeaveChat}
+            >
+              <Text style={styles.buttonText}>Leave chat</Text>
+            </TouchableOpacity>
         </View>
-        <ContactList contacts={contacts} navigation={this.props.navigation} />
+        <ContactList contacts={contacts} navigation={this.props.navigation} route={this.props.route} currentUserId={this.state.currentUserId} />
       </View>
     );
   }

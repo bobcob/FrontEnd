@@ -1,16 +1,11 @@
 import React, { Component } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { NavigationContainer } from "@react-navigation/native";
 import {
   getReq,
   postReq,
   getDomain,
   deleteReq,
-  getAuthToken,
   getUid,
-  getTargetUser,
   getTargetChat,
   sortArray,
   getTargetChatContacts,
@@ -23,6 +18,7 @@ export default class App extends Component {
       title: "Chat",
       userIds: [],
       contacts: [],
+      // stores the credentials of the user
       credentials: "",
     };
   }
@@ -61,6 +57,7 @@ export default class App extends Component {
       title: this.state.title,
       chatId: chatID.json.int,
       userID: sortedIDs,
+      creatorID: parseInt(await getUid()),
     };
     var sendRelationship = await postReq(
       getDomain() + "api/chats/relationships/",
@@ -78,10 +75,12 @@ export default class App extends Component {
   };
 
   handleAdmin = async (contact) => {
+    console.log(contact);
     console.log(await getTargetChatContacts());
+    console.log(await getTargetChat());
     const data = {
       chatId: parseInt(await getTargetChatContacts()),
-      userID: parseInt(await getTargetChat()),
+      userId: contact.id
     };
     const req = await postReq(
       getDomain() + "api/chats/relationships/admin/",
@@ -93,7 +92,7 @@ export default class App extends Component {
     const { navigation } = this.props;
     const data = {
       chatId: parseInt(await getTargetChatContacts()),
-      userID: contact.id,
+      userId: contact.id,
     };
     const req = await deleteReq(getDomain() + "api/chats/relationships/", data);
     if (req.status == 200) {
@@ -106,7 +105,7 @@ export default class App extends Component {
 
   checkCredentials = async (contacts) => {
     const data = {
-      chatID: 3,
+      chatID: await getTargetChatContacts(),
       id: parseInt(await getUid()),
     };
     const checkCredentials = await postReq(

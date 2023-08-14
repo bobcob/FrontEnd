@@ -10,7 +10,10 @@ import {
 import { getDomain, getReq, postReq, getUid } from "./requests";
 import { StatusBar } from "expo-status-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+// importing all the custom and inbuilt functions to use in the code
+
 export default class Conversation extends Component {
+  // setting the paramaters in the state
   constructor(props) {
     super(props);
     this.state = {
@@ -18,15 +21,20 @@ export default class Conversation extends Component {
       messages: [],
       newMessage: "",
     };
+    // allows a scroll view through the messages
     this.scrollViewRef = React.createRef();
   }
-
+  //checks for messages every 2 seconds
+  startPollingChat = () => {
+    this.chatPollingInterval = setInterval(this.getChat, 2000 );
+  }
+  // gets the title in the conversation
   getTitle = async () => {
     const { chatId } = this.props.route.params;
     console.log(chatId);
     const title = await getReq(getDomain() + "api/chats/" + chatId + "/title");
     AsyncStorage.setItem("getTargetChatContacts", chatId);
-    return title.json.title;
+    return title.json.chatName;
   };
 
   getChat = async () => {
@@ -37,20 +45,27 @@ export default class Conversation extends Component {
 
   async componentDidMount() {
     this.setState({ userID: await getUid() });
-    const chatTitle = await this.getTitle();
-    this.props.navigation.setOptions({ title: chatTitle });
     this.getChat();
+    this.startPollingChat();
+    
     this.unsubscribe = this.props.navigation.addListener("focus", async () => {
+      const chatTitle = await this.getTitle();
       this.props.navigation.setOptions({ title: chatTitle });
       this.getChat();
+     
     });
 
+    const chatTitle = await this.getTitle();
+    this.props.navigation.setOptions({ title: chatTitle });
+    // checks for a press on the button in the header
     this.props.navigation.setParams({
       handleHeaderButtonPress: this.handleHeaderButtonPress,
     });
   }
 
+
   componentWillUnmount() {
+    clearInterval(this.chatPollingInterval);
     this.unsubscribe();
   }
 
@@ -58,14 +73,17 @@ export default class Conversation extends Component {
     this.setState({ newMessage: text });
   };
 
+  // function that sends each message and its data via a post req
   handleSend = async () => {
-    const { chatId } = this.props.route.params;
+    const { chatId , groupID  } = this.props.route.params;
+    console.log(groupID);
     const newMessage = {
       title: await this.getTitle(),
-      userID: this.state.userID,
+      userId: this.state.userID,
       time: new Date(),
       message: this.state.newMessage,
       chatId: chatId,
+      organisationId: groupID
     };
     await postReq(getDomain() + "api/chats/", newMessage);
     this.setState({ newMessage: "" });
@@ -88,7 +106,7 @@ export default class Conversation extends Component {
               key={message.id}
               style={[
                 styles.message,
-                parseInt(message.userID) === parseInt(this.state.userID)
+                parseInt(message.userId) === parseInt(this.state.userID)
                   ? styles.currentUserMessage
                   : styles.otherUserMessage,
               ]}

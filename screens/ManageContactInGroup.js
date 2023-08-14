@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
+
 import {
   getReq,
   postReq,
   getDomain,
   deleteReq,
   getUid,
-  getTargetChat,
   sortArray,
 } from "./requests";
 
@@ -17,13 +17,15 @@ export default class App extends Component {
       title: "Chat",
       userIds: [],
       contacts: [],
+      // stores the credentoals of the user
+      credentials: "",
+      message:""
     };
   }
 
   getContact = async () => {
-    const req = await getReq(
-      getDomain() + "api/users/" + (await getTargetChat())
-    );
+    const { contactID } = this.props.route.params;
+    const req = await getReq(getDomain() + "api/users/" + contactID);
     const data = await req.json;
     this.setState({ contacts: data });
   };
@@ -31,9 +33,16 @@ export default class App extends Component {
   componentDidMount() {
     this.unsubscribe = this.props.navigation.addListener("focus", () => {
       this.getContact();
-      this.props.navigation.setOptions({ title: "Manage contact" });
+      this.props.navigation.setOptions({ title: "Manage user" });
     });
+    this.checkCredentialsAndUpdateState();
   }
+
+  checkCredentialsAndUpdateState = async () => {
+    const { contacts } = this.state;
+    const credentials = await this.checkCredentials(contacts);
+    this.setState({ credentials });
+  };
 
   componentWillUnmount() {
     this.unsubscribe();
@@ -66,25 +75,51 @@ export default class App extends Component {
     }
   };
 
-  handlePressRemove = async (contact) => {
-    const { navigation } = this.props;
-    const now = new Date();
+  handleAdmin = async (contact) => {
+    const { group} = this.props.route.params;
     const data = {
-      user1ID: await getUid(),
-      user2ID: contact.id,
-      dateAdded: now,
+      organisationId:group.organisationId,
+      userId: contact.id,
     };
-    const req = await deleteReq(getDomain() + "api/contacts/", data);
+    const req = await postReq(
+      getDomain() + "api/organisations/admin",
+      data
+    );
+  };
+
+  handlePressRemove = async (contact) => {
+    const { group} = this.props.route.params;
+    const data = {
+      organisationId:group.organisationId,
+      userId: contact.id,
+    };
+    const req = await deleteReq(getDomain() + "api/organisations/", data);
     if (req.status == 200) {
-      navigation.navigate("Main", { screen: "Contacts" });
+      const getGroups = await getReq(getDomain() + "api/organisations/" + (await getUid()));
+      this.setState({ groups: getGroups.json });
+      this.props.navigation.navigate("GroupInformation", {
+        group
+      });
+    }
+    else{
+      this.setState({ message: "Cannot remove user" });
     }
   };
 
+  checkCredentials = async (contacts) => {
+    const { groupID } = this.props.route.params;
+    const checkCredentials = await getReq(
+      getDomain() + "api/organisations/admin/"+await getUid() + "/check/" + groupID
+    );
+    return checkCredentials.json.user;
+  };
+
   render() {
-    const { contacts } = this.state;
-    
+    const { contacts, credentials } = this.state;
     return (
       <View style={styles.container}>
+        <Text style={styles.heading}>User actions</Text>
+        
         <View style={styles.infoContainer}>
           <Text style={styles.infoLabel}>ID:</Text>
           <Text style={styles.infoValue}>{contacts.id}</Text>
@@ -103,12 +138,22 @@ export default class App extends Component {
             onPress={this.handlePressMessage}
             style={styles.button}
           />
-          <Button
-            title="Remove"
-            onPress={() => this.handlePressRemove(contacts)}
-            style={styles.button}
-          />
+          {credentials === "Admin" || credentials === "Creator" ? (
+            <Button
+              title="Remove"
+              onPress={() => this.handlePressRemove(contacts)}
+              style={styles.button}
+            />
+          ) : null}
+          {credentials === "Creator" ? (
+            <Button
+              title="Give admin role"
+              onPress={() => this.handleAdmin(contacts)}
+              style={styles.button}
+            />
+          ) : null}
         </View>
+        <Text>{this.state.message}</Text>
       </View>
     );
   }

@@ -10,9 +10,12 @@ import {
   getDomain,
   getReq,
   postReq,
+  sortArray,
   getUid,
   getTargetChatContacts,
+  getTargetChat,
 } from "./requests";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default class App extends Component {
   constructor(props) {
@@ -28,42 +31,36 @@ export default class App extends Component {
     const title = await getReq(
       getDomain() + "api/chats/" + (await getTargetChatContacts()) + "/title"
     );
-    return title.json;
+    return title.json.title;
   };
-
   handleCreateChat = async () => {
+    const { group } = this.props.route.params;
+    console.log(group);
     if (this.state.userId.includes(parseInt(await getUid()))) {
       this.setState({
-        warning: "You cannot add yourself to a chat",
+        warning: "You cannot add yourself to a group",
       });
       return;
     }
-    const chatinfo = await this.getTitle();
-    const data = {
-      admin: "false",
-      groupCreator: "false",
-      chatName:chatinfo.Title,
-      chatId: parseInt(await getTargetChatContacts()),
-      userId: parseInt(this.state.userId),
-      organisationId:chatinfo.organisationId
 
-    };
+  
+    const data = {
+      organisationId: group.organisationId,
+      userId: parseInt(this.state.userId),
+      Name: group.name,
+      OrganisationsCreator: "false"
+    }
     var sendRelationship = await postReq(
-      getDomain() + "api/chats/relationships/addUserToChat",
+      getDomain() + "api/organisations/addUserToGroup",
       data
     );
     if (sendRelationship.status == 200) {
-      this.props.navigation.navigate("ChatInformation", {
-        targetChatContacts: sendRelationship.json.chat,
-      });
-    }
-    if (sendRelationship.status == 404) {
-      this.setState({
-        warning: "User not in group",
+      this.props.navigation.navigate("GroupInformation", {
+        group
       });
     } else {
-      this.props.navigation.navigate("ChatInformation", {
-        targetChatContacts: sendRelationship.json.chat,
+      this.props.navigation.navigate("GroupInformation", {
+        group
       });
     }
   };
@@ -77,11 +74,14 @@ export default class App extends Component {
   handleUserIdChange = (userId) => {
     this.setState({ userId: userId });
   };
-
+  componentDidMount() {
+    this.unsubscribe = this.props.navigation.addListener("focus", () => {
+       this.props.navigation.setOptions({ title: "Add user to group" });
+    });
+  }
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.title}>Add user to chat</Text>
         <View>
           <TextInput
             style={styles.input}
@@ -94,7 +94,7 @@ export default class App extends Component {
           <Text style={styles.buttonText}>Add additional user</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button} onPress={this.handleCreateChat}>
-          <Text style={styles.buttonText}>Add user(s) to chat</Text>
+          <Text style={styles.buttonText}>Add user(s) to group</Text>
         </TouchableOpacity>
         <Text>{this.state.warning}</Text>
       </View>

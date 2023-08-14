@@ -1,13 +1,14 @@
 import { StatusBar } from "expo-status-bar";
+import React, { Component } from "react";
 import {
-  StyleSheet,
   Text,
   View,
-  Button,
   TextInput,
-  Pressable,
+  Button,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
 } from "react-native";
-import { Component } from "react";
 import {
   getReq,
   postReq,
@@ -69,31 +70,34 @@ export default class App extends Component {
       this.signUpHandler(email, password, name);
     }
   };
-  // Include db check for existing user info
-  // check for plain text in name
 
   render() {
-    const { navigation } = this.props;
     return (
-      <View>
-        <Text>Sign up</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
+      >
+        <Text style={styles.title}>Sign up</Text>
         <TextInput
+          style={styles.input}
           placeholder="Email"
           onChangeText={this.setEmail}
           value={this.state.email}
-        ></TextInput>
+        />
         <TextInput
+          style={styles.input}
+          secureTextEntry={true}
           placeholder="Password"
           onChangeText={this.setPassword}
           value={this.state.password}
-        ></TextInput>
+        />
         <TextInput
+          style={styles.input}
           placeholder="Full name"
           onChangeText={this.setName}
           value={this.state.name}
-        ></TextInput>
+        />
         <Button
-          style={styles.button}
           title="Sign up"
           onPress={() =>
             this.dataCheck(
@@ -102,9 +106,32 @@ export default class App extends Component {
               this.state.name
             )
           }
-        ></Button>
+        />
         <Text>{this.state.loginStatus}</Text>
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    height: 40,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 10,
+  },
+});

@@ -7,11 +7,12 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { getDomain, postReq, getUid } from "./requests";
+// importing all the custom and inbuilt functions to use in the code
 
 export default class App extends Component {
   constructor(props) {
     super(props);
-
+    // declaring the variables which need to be stored within the state
     this.state = {
       ID: "",
       name: "",
@@ -19,12 +20,17 @@ export default class App extends Component {
     };
   }
 
+  setId = (ID) => {
+    this.setState({ ID });
+  };
+
+  // function that handles the submission of the data in order to add add a new contact
   handleSubmit = async (id2) => {
     const { navigation } = this.props;
     const now = new Date();
     const data = {
-      user1ID: await getUid(),
-      user2ID: id2,
+      user1Id: parseInt(await getUid()),
+      user2Id: parseInt(id2),
       dateAdded: now,
     };
     const req = await postReq(getDomain() + "api/contacts/", data);
@@ -36,29 +42,27 @@ export default class App extends Component {
       console.log(this.state.status);
     }
   };
+  // renders the title every time the page is loaded
+  componentDidMount() {
+    this.props.navigation.setOptions({ title: "Add contact" });
+  }
+  /*
 
+  renders a page which allows the input of another user id , ready to make it a contact
+  the state variable id changes every time there is input in the box
+
+  */
   render() {
     return (
       <View style={styles.container}>
-        <Text style={styles.heading}>Add Contact</Text>
         <View style={styles.form}>
           <View style={styles.inputContainer}>
             <Text style={styles.label}>ID:</Text>
             <TextInput
               style={styles.input}
-              onChangeText={(text) => this.setState({ ID: text })}
+              onChangeText={this.setId}
               value={this.state.ID}
               placeholder="Enter recipient's user ID"
-              required
-            />
-          </View>
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Name:</Text>
-            <TextInput
-              style={styles.input}
-              onChangeText={(text) => this.setState({ name: text })}
-              value={this.state.email}
-              placeholder="Enter recipient's full name"
               required
             />
           </View>
@@ -80,7 +84,8 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    paddingTop:20
   },
   heading: {
     fontSize: 24,

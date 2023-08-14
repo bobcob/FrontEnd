@@ -19,74 +19,53 @@ export default class App extends Component {
     };
   }
 
-  handleCreateChat = async () => {
+  handleCreateGroup = async () => {
     if (this.state.userIds.includes(parseInt(await getUid()))) {
       this.setState({
         warning: "You cannot add yourself to a chat",
       });
       return;
     }
-    const chatID = await getReq(getDomain() + "api/chats/relationships/");
-    const userID = await getUid();
-    const newUserIds = [...this.state.userIds, userID];
-  const sortedIDs = sortArray(newUserIds).map(Number);
-  // conditionally getting the variable as it may not be set , returning null if it is not
+    const orgID = await getReq(getDomain() + "api/organisations/");
+    this.state.userIds.push(await getUid());
+    const sortedIDs = sortArray(this.state.userIds).map(Number);
     const groupID = this.props.route.params?.groupID;
     const groupData = groupID ? { groupID } : {};
     var data = {
       creatorID: parseInt(await getUid()),
-      title: this.state.title,
-      chatId: chatID.json.int,
-      userID: sortedIDs,
-      // conditionally sending the group data paramater as it is not applicable for the screen in all scenarios
-      ...groupData,
+      Name: this.state.title,
+      orgID: orgID.json.int,
+      userIDs: sortedIDs,
     };
     var sendRelationship = await postReq(
-      getDomain() + "api/chats/relationships/",
+      getDomain() + "api/organisations/",
       data
     );
-    console.log(sendRelationship.status);
 
     if (sendRelationship.status == 200) {
-      console.log(groupData.groupID);
-      console.log(groupData);
-      this.props.navigation.navigate("Conversation", {
-        groupID:groupData.groupID,
-        chatId: sendRelationship.json.chat,
-      });
-    
-    }   if (sendRelationship.status == 400) {
-        this.setState({
-          warning: sendRelationship.json.error,
-        });
-      } else {
-      this.props.navigation.navigate("Conversation", {
-        chatId: sendRelationship.json.chat,
-        ...groupData,
-      });
+      this.props.navigation.navigate("Groups");
     }
   };
-  // adding a new empty string to the array - effectivly making a space for a potential id when the button is clicked
+
   handleAddUser = () => {
     this.setState((prevState) => ({
       userIds: [...prevState.userIds, ""],
     }));
   };
-  // updates the space with the user id after the input box has been created
+
   handleUserIdChange = (text, index) => {
     const newUserIds = [...this.state.userIds];
     newUserIds[index] = text.trim() === "" ? "" : parseInt(text, 10);
     this.setState({ userIds: newUserIds });
   };
-  componentDidMount() {
-    this.props.navigation.setOptions({ title: "New chat" });
-  }
 
+  componentDidMount() {
+    this.props.navigation.setOptions({ title: "New group" });
+  }
 
   render() {
     return (
       <View style={styles.container}>
-
         <TextInput
           style={styles.input}
           placeholder="Title"
@@ -107,8 +86,8 @@ export default class App extends Component {
         <TouchableOpacity style={styles.button} onPress={this.handleAddUser}>
           <Text style={styles.buttonText}>Add User</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.button} onPress={this.handleCreateChat}>
-          <Text style={styles.buttonText}>Create new chat</Text>
+        <TouchableOpacity style={styles.button} onPress={this.handleCreateGroup}>
+          <Text style={styles.buttonText}>Create new group</Text>
         </TouchableOpacity>
         <Text>{this.state.warning}</Text>
       </View>
